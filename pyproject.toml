@@ -17,6 +17,7 @@ dependencies = [
     "langchain-pinecone>=0.2.13",
     "pandas>=3.0.1",
     "pinecone<8.0.0",
+    "pydantic>=2.12.5",
     "requests>=2.32.5",
     "seaborn>=0.13.2",
     "sentence-transformers>=5.2.3",
