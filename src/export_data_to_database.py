@@ -8,8 +8,8 @@ from factory import make_embeddings, make_vector_store
 
 
 def ingest_send_data(csv_path: str):
-    embeddings = make_embeddings(model_kwargs={'device': os.getenv('DEVICE')})
-
+    embeddings = make_embeddings(device=os.getenv('DEVICE'))
+    print(f'Reading {csv_path}')
     loader = CSVLoader(
         file_path=DATA_DIR / csv_path,
         csv_args={
