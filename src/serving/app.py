@@ -5,9 +5,10 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, status
 from langchain_core.language_models import BaseChatModel
 
-from src.chain import create_prompt
-from src.factory import make_embeddings, make_model, make_vector_store
-from src.retrieval import retrieve_from_query
+from src.data.factory import make_embeddings, make_model, make_vector_store
+from src.data.retrieval import retrieve_from_query
+from src.serving.chain import create_prompt
+from src.serving.schemas import AskRequest
 
 artifacts = {}
 
@@ -29,12 +30,12 @@ app = FastAPI(lifespan=lifespan)
 
 
 @app.post('/ask', status_code=status.HTTP_200_OK)
-async def ask(query: str):
+async def ask(query: AskRequest):
 
-    data = retrieve_from_query(artifacts['storage'], query, 10)
-    prompt = create_prompt(data, query)
+    data = retrieve_from_query(artifacts['storage'], query.question, 10)
+    prompt = create_prompt(data, query.question)
 
     model: BaseChatModel = artifacts['model']
-    response = model.invoke(prompt).text
+    response = await model.ainvoke(prompt)
 
-    return {'response': response}
+    return {'response': response.text}

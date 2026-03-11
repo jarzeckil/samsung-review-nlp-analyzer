@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import requests
 
-from config import DATA_DIR
+from src.core.config import DATA_DIR
 
 
 def scrape_trustpilot(url: str, output_file: str):

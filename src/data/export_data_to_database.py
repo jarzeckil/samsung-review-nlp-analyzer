@@ -3,8 +3,8 @@ import os
 from dotenv import load_dotenv
 from langchain_community.document_loaders import CSVLoader
 
-from config import DATA_DIR
-from factory import make_embeddings, make_vector_store
+from src.core.config import DATA_DIR
+from src.data.factory import make_embeddings, make_vector_store
 
 
 def ingest_send_data(csv_path: str):
