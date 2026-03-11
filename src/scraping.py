@@ -74,6 +74,6 @@ def scrape_trustpilot(url: str, output_file: str):
 
 if __name__ == '__main__':
     scrape_trustpilot(
-        'https://www.trustpilot.com/review/www.samsung.com/uk?languages=en&page=2',
+        'https://www.trustpilot.com/review/www.samsung.com/uk?languages=en&page=',
         'reviews_uk.csv',
     )
