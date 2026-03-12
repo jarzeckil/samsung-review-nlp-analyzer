@@ -1,8 +1,5 @@
 """Unit tests for data retrieval functions."""
 
-from unittest.mock import Mock
-
-import pytest
 from langchain_core.documents import Document
 
 

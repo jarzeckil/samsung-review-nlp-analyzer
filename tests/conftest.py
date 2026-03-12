@@ -1,12 +1,11 @@
 """Shared pytest fixtures and configuration."""
 
-import os
-from typing import Generator
-from unittest.mock import AsyncMock, MagicMock, Mock
+from collections.abc import Generator
+from unittest.mock import AsyncMock, Mock
 
-import pytest
 from fastapi.testclient import TestClient
 from langchain_core.documents import Document
+import pytest
 
 
 @pytest.fixture
@@ -101,7 +100,7 @@ def mock_agent() -> AsyncMock:
 
 
 @pytest.fixture
-def app_with_mock_agent(mock_agent, monkeypatch) -> Generator[TestClient, None, None]:
+def app_with_mock_agent(mock_agent, monkeypatch) -> Generator[TestClient]:
     """FastAPI test client with mocked agent."""
     # Mock the factory functions to avoid loading real models
     mock_embeddings = Mock()

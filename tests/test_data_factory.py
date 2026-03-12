@@ -2,8 +2,6 @@
 
 from unittest.mock import Mock, patch
 
-import pytest
-
 
 class TestMakeEmbeddings:
     """Tests for make_embeddings factory function."""
@@ -32,7 +30,7 @@ class TestMakeEmbeddings:
         mock_instance = Mock()
         mock_hf_embeddings.return_value = mock_instance
 
-        result = make_embeddings(device='cuda')
+        make_embeddings(device='cuda')
 
         call_kwargs = mock_hf_embeddings.call_args.kwargs
         assert call_kwargs['model_kwargs'] == {'device': 'cuda'}
@@ -48,7 +46,7 @@ class TestMakeEmbeddings:
         mock_hf_embeddings.return_value = mock_instance
 
         custom_kwargs = {'normalize_embeddings': True, 'batch_size': 32}
-        result = make_embeddings(device='cpu', encode_kwargs=custom_kwargs)
+        make_embeddings(device='cpu', encode_kwargs=custom_kwargs)
 
         call_kwargs = mock_hf_embeddings.call_args.kwargs
         assert call_kwargs['encode_kwargs'] == custom_kwargs
@@ -82,9 +80,7 @@ class TestMakeVectorStore:
         mock_instance = Mock()
         mock_pinecone.return_value = mock_instance
 
-        result = make_vector_store(
-            index_name='production-index', embeddings=mock_embeddings
-        )
+        make_vector_store(index_name='production-index', embeddings=mock_embeddings)
 
         call_kwargs = mock_pinecone.call_args.kwargs
         assert call_kwargs['index_name'] == 'production-index'
