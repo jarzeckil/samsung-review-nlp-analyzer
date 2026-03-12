@@ -14,7 +14,6 @@ import streamlit as st
 # Configuration
 # ============================================================================
 
-# API URL can be configured via environment variable (useful for Docker)
 API_URL = os.getenv('API_URL', 'http://localhost:8000/ask')
 PAGE_TITLE = 'Samsung Review Agent'
 PAGE_ICON = '🤖'
