@@ -1,3 +1,5 @@
+import os
+
 from langchain_core.embeddings import Embeddings
 from langchain_groq import ChatGroq
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -5,7 +7,6 @@ from langchain_pinecone import PineconeVectorStore
 
 
 def make_embeddings(
-    model_name: str = 'sentence-transformers/all-mpnet-base-v2',
     device='cpu',
     encode_kwargs=None,
 ) -> Embeddings:
@@ -15,7 +16,7 @@ def make_embeddings(
     model_kwargs = {'device': device}
 
     hf = HuggingFaceEmbeddings(
-        model_name=model_name,
+        model_name=os.getenv('EMBEDDING_MODEL_NAME'),
         model_kwargs=model_kwargs,
         encode_kwargs=encode_kwargs,
     )
@@ -31,7 +32,7 @@ def make_vector_store(index_name: str, embeddings: Embeddings) -> PineconeVector
 
 def make_model():
     model = ChatGroq(
-        model='llama-3.1-8b-instant',
+        model=os.getenv('CHAT_MODEL_NAME'),
         temperature=0.0,
         max_retries=2,
     )

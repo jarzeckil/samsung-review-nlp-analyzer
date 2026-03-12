@@ -13,8 +13,6 @@ from src.core.config import PROMPT_PATH
 from src.data.factory import make_embeddings, make_model, make_vector_store
 from src.serving.schemas import AskRequest, AskResponse
 
-artifacts = {}
-
 
 @asynccontextmanager
 async def lifespan(a: FastAPI):
@@ -31,7 +29,8 @@ async def lifespan(a: FastAPI):
         | model
         | StrOutputParser()
     )
-    artifacts['chain'] = rag_chain
+
+    app.state.chain = rag_chain
 
     yield
 
@@ -41,6 +40,6 @@ app = FastAPI(lifespan=lifespan)
 
 @app.post('/ask', status_code=status.HTTP_200_OK)
 async def ask(query: AskRequest):
-    answer = await artifacts['chain'].ainvoke(query.question)
+    answer = await app.state.chain.ainvoke(query.question)
 
     return AskResponse(response=answer)
