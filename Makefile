@@ -44,6 +44,10 @@ api:
 frontend:
 	uv run streamlit run src/serving/frontend.py
 
+## Run all tests
+.PHONY: test
+test:
+	uv run pytest
 
 #################################################################################
 # Self Documenting Commands                                                     #
