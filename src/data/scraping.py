@@ -25,6 +25,7 @@ def scrape_trustpilot(url: str, output_file: str):
 
         if response.url in visited:
             break
+        visited.add(response.url)
 
         if response.status_code == 200:
             print('Success')
