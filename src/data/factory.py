@@ -1,7 +1,6 @@
 import os
 
 from langchain_core.embeddings import Embeddings
-from langchain_groq import ChatGroq
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_pinecone import PineconeVectorStore
 
@@ -28,13 +27,3 @@ def make_vector_store(index_name: str, embeddings: Embeddings) -> PineconeVector
     vector_store = PineconeVectorStore(embedding=embeddings, index_name=index_name)
 
     return vector_store
-
-
-def make_model():
-    model = ChatGroq(
-        model=os.getenv('CHAT_MODEL_NAME'),
-        temperature=0.0,
-        max_retries=2,
-    )
-
-    return model
