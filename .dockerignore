@@ -1,0 +1,78 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Git
+.git/
+.gitignore
+.gitattributes
+.github/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+.hypothesis/
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+notebooks/
+*.ipynb
+
+# Environment files (will be passed via docker-compose)
+.env
+.env.*
+
+# Documentation
+*.md
+docs/
+
+# CI/CD
+.pre-commit-config.yaml
+.github
+
+# Ruff cache
+.ruff_cache/
+
+# Docker files
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Data files (optional - uncomment if data is large)
+# data/
+# *.csv
