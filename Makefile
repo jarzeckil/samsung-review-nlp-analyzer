@@ -34,6 +34,20 @@ format:
 	uv run ruff check --fix
 	uv run ruff format
 
+## Run FastAPI backend locally
+.PHONY: api
+api:
+	uv run uvicorn src.serving.app:app --reload
+
+## Run Streamlit frontend locally
+.PHONY: frontend
+frontend:
+	uv run streamlit run src/serving/frontend.py
+
+## Run all tests
+.PHONY: test
+test:
+	uv run pytest
 
 #################################################################################
 # Self Documenting Commands                                                     #

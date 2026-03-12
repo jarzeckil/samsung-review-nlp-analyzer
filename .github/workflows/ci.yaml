@@ -26,10 +26,13 @@ jobs:
           enable-cache: true
 
       - name: Install the project
-        run: uv sync --locked --dev
+        run: uv sync --locked --dev --group test
 
       - name: Run Linting (Ruff)
         run: uv run ruff check .
 
       - name: Check Formatting
         run: uv run ruff format --check .
+
+      - name: Run Tests
+        run: uv run pytest
