@@ -9,13 +9,13 @@
 [![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff)](#)
 [![Pytest](https://img.shields.io/badge/Pytest-fff?logo=pytest&logoColor=000)](#)
 
-## Executive Summary
+## Summary
 
-Production-grade RAG (Retrieval-Augmented Generation) system for semantic analysis of Samsung SmartThings customer reviews scraped from TrustPilot. Implements agentic AI with tool-using LLMs to provide structured insights into IoT product sentiment, feature requests, and customer pain points. Built for low-latency query-response cycles using vector similarity search over embedded review corpus.
+Production-grade RAG system for semantic analysis of Samsung customer reviews scraped from TrustPilot. Implements agentic AI with tool-using LLMs to provide structured insights into review sentiment, feature requests, and customer pain points. Built for low-latency query-response cycles using vector similarity search over embedded review corpus.
 
 **Problem**: Manual analysis of unstructured customer feedback at scale is infeasible. Traditional keyword search fails to capture semantic similarity.
 
-**Solution**: Automated pipeline from web scraping → data cleaning → vectorization → conversational AI interface. Groq-powered LLM with ReAct-style tool use retrieves contextually relevant reviews from Pinecone vector store, enabling natural language queries over 182 cleaned reviews.
+**Solution**: Pipeline: web scraping → data cleaning → vectorization → conversational AI interface. Groq-powered LLM with ReAct-style tool use retrieves contextually relevant reviews from Pinecone vector store, enabling natural language queries over 180 cleaned reviews.
 
 **Business Impact**: Reduces time-to-insight from hours to seconds. Enables product teams to query review data conversationally without SQL or manual filtering.
 
@@ -63,18 +63,18 @@ graph TB
 
 ## Core Technologies
 
-| Component | Technology | Justification                                                                                                              |
-|-----------|------------|----------------------------------------------------------------------------------------------------------------------------|
-| **API Framework** | FastAPI 0.135+ | Asynchronous ASGI server with automatic OpenAPI docs, native async/await support for non-blocking I/O during LLM inference |
-| **LLM Provider** | Groq (Llama 3.1 70B) | Sub-second inference latency via LPU architecture, OpenAI-compatible API, superior to GPT-3.5 for reasoning tasks          |
-| **RAG Framework** | LangChain 1.2+ | Production-ready agent orchestration with tool use, standardized vector store abstractions, prompt management              |
-| **Vector Database** | Pinecone | Managed service with HNSW indexing, sub-50ms similarity search, metadata filtering, horizontal scalability                 |
-| **Embeddings** | HuggingFace sentence-transformers | Open-source multilingual embeddings (768-dim), CPU-optimized, offline inference support                                    |
-| **Frontend** | Streamlit 1.40+ | Rapid prototyping of conversational UI with session state management, zero JavaScript required                             |
-| **Web Scraping** | BeautifulSoup4 + Requests | Lightweight HTML parsing, TrustPilot pagination handling, rate-limit-safe delay injection                                  |
-| **Data Processing** | Pandas 2.x + dateparser | ETL pipeline for duplicate removal, date normalization, score distribution analysis                                        |
-| **Containerization** | Docker Compose | Multi-service orchestration with health checks, inter-container networking, volume mounts for data/prompts                 |
-| **Package Manager** | uv | 10-100x faster than pip, lockfile-based reproducibility, Python 3.13 support                                               |
+| Component | Technology                        | Justification                                                                                                            |
+|----------|-----------------------------------|--------------------------------------------------------------------------------------------------------------------------|
+| **API** | FastAPI 0.135+ / Uvicorn          | Asynchronous ASGI server with automatic OpenAPI docs, native async/await support for non-blocking I/O during LLM inference |
+| **LLM Provider** | Groq (Llama 3.1 70B)              | Sub-second inference latency.                                                                                            |
+| **RAG Framework** | LangChain 1.2+                    | Production-ready agent orchestration with tool use, standardized vector store abstractions, prompt management            |
+| **Vector Database** | Pinecone                          | Managed service with sub-50ms similarity search, metadata filtering, horizontal scalability                |
+| **Embeddings** | HuggingFace sentence-transformers | Open-source multilingual embeddings (768-dim), CPU-optimized, offline inference support                                  |
+| **Frontend** | Streamlit 1.40+                   | Rapid prototyping of conversational UI with session state management, zero JavaScript required                           |
+| **Web Scraping** | BeautifulSoup4 + Requests         | Lightweight HTML parsing, TrustPilot pagination handling, rate-limit-safe delay injection                                |
+| **Data Processing** | Pandas 2.x + dateparser           | ETL pipeline for duplicate removal, date normalization, score distribution analysis                                      |
+| **Containerization** | Docker Compose                    | Multi-service orchestration with health checks, inter-container networking, volume mounts for data/prompts               |
+| **Package Manager** | uv                                | 10-100x faster than pip, lockfile-based reproducibility, Python 3.13 support                                             |
 
 ## Quick Start
 
@@ -88,8 +88,8 @@ graph TB
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/smartthings-nlp-analyzer.git
-cd smartthings-nlp-analyzer
+git clone https://github.com/jarzeckil/samsung-review-nlp-analyzer.git
+cd samsung-review-nlp-analyzer
 
 # Configure environment
 cp .env.example .env
@@ -106,7 +106,7 @@ Required keys in `.env`:
 ```bash
 DEVICE=cpu
 PINECONE_API_KEY=sk-xxxxx
-INDEX_NAME=smartthings-reviews
+INDEX_NAME=index-name
 CSV_NAME=reviews_cleaned.csv
 GROQ_API_KEY=gsk_xxxxx
 CHAT_MODEL_NAME=llama-3.1-70b-versatile
@@ -128,29 +128,27 @@ EMBEDDING_MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2
 
 **Source**: TrustPilot UK Samsung reviews  
 **Method**: BeautifulSoup pagination scraper  
-**Output**: `data/reviews.csv` (187 raw reviews)
+**Output**: `data/reviews.csv` (raw reviews)
 
 **Implementation** (`src/data/scraping.py`):
 - Random delays (1-3s) to avoid rate limiting
 - Visited URL tracking prevents infinite loops
 - Extracts: Date (relative format), Score (1-5 stars), Review text
-- HTML selectors: `styles_cardWrapper__g8amG`, `data-service-review-rating`
 
 ### 2. Data Cleaning
 
-**Input**: `reviews.csv` (187 rows)  
+**Input**: `reviews.csv` 
 **Transformations** (`notebooks/01_eda_cleaning.ipynb`):
 1. Drop nulls in any column
-2. Parse dates with `dateparser` ("2 days ago" → timestamp)
-3. Remove duplicates (5 found)
-4. Score distribution analysis
+2. Parse dates with `dateparser`
+3. Remove duplicates
+4. EDA
 
-**Output**: `reviews_cleaned.csv` (182 rows)
+**Output**: `reviews_cleaned.csv`
 
 **EDA Findings**:
 - 68% are 1-2 star reviews (negative bias)
 - 1-star reviews 3x longer than 5-star
-- Reviews in Polish (Samsung Poland market)
 
 ### 3. Vectorization
 
@@ -159,7 +157,6 @@ EMBEDDING_MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2
 **Pinecone Storage**:
 - 768-dimensional vectors
 - Metadata: `{'Date': '2024-01-15', 'Score': '2'}`
-- Index type: HNSW
 
 ### 4. Query Processing
 
