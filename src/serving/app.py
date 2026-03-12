@@ -1,16 +1,11 @@
 from contextlib import asynccontextmanager
 import os
-from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, status
-from langchain_core.language_models import BaseChatModel
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough
 
-from src.core.config import PROMPT_PATH
-from src.data.factory import make_embeddings, make_model, make_vector_store
+from src.data.factory import make_embeddings, make_vector_store
+from src.rag.factory import create_agent_tools, make_agent
 from src.serving.schemas import AskRequest, AskResponse
 
 
@@ -18,19 +13,11 @@ from src.serving.schemas import AskRequest, AskResponse
 async def lifespan(a: FastAPI):
     load_dotenv()
     embedding = make_embeddings(device=os.getenv('DEVICE'))
-    retriever = make_vector_store(os.getenv('INDEX_NAME'), embedding).as_retriever(k=5)
-    model: BaseChatModel = make_model()
-    prompt_template = Path(PROMPT_PATH).read_text(encoding='utf-8')
-    prompt = ChatPromptTemplate.from_template(prompt_template)
+    vector_store = make_vector_store(os.getenv('INDEX_NAME'), embedding)
+    agent_tools = create_agent_tools(vector_store)
 
-    rag_chain = (
-        {'context': retriever, 'query': RunnablePassthrough()}
-        | prompt
-        | model
-        | StrOutputParser()
-    )
-
-    app.state.chain = rag_chain
+    agent = make_agent(agent_tools)
+    app.state.agent = agent
 
     yield
 
@@ -40,6 +27,7 @@ app = FastAPI(lifespan=lifespan)
 
 @app.post('/ask', status_code=status.HTTP_200_OK)
 async def ask(query: AskRequest):
-    answer = await app.state.chain.ainvoke(query.question)
+    inputs = {'messages': [('user', query.question)]}
+    answer = await app.state.agent.ainvoke(inputs)
 
-    return AskResponse(response=answer)
+    return AskResponse(response=answer['messages'][-1].content)
