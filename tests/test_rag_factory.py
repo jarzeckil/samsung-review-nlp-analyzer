@@ -142,6 +142,7 @@ class TestMakeModel:
         """Test that make_model creates ChatOllama when LOCAL_MODEL is set."""
         monkeypatch.setenv('LOCAL_MODEL', 'true')
         monkeypatch.setenv('OLLAMA_MODEL_NAME', 'llama3.1')
+        monkeypatch.delenv('OLLAMA_BASE_URL', raising=False)
 
         from src.rag.factory import make_model
 
@@ -150,7 +151,9 @@ class TestMakeModel:
 
         result = make_model()
 
-        mock_ollama.assert_called_once_with(model='llama3.1', temperature=0.0)
+        mock_ollama.assert_called_once_with(
+            model='llama3.1', base_url='http://localhost:11434', temperature=0.0
+        )
         assert result == mock_instance
 
     @patch('src.rag.factory.ChatOllama')
@@ -158,6 +161,7 @@ class TestMakeModel:
         """Test that make_model uses Ollama model name from environment."""
         monkeypatch.setenv('LOCAL_MODEL', 'true')
         monkeypatch.setenv('OLLAMA_MODEL_NAME', 'mistral')
+        monkeypatch.delenv('OLLAMA_BASE_URL', raising=False)
 
         from src.rag.factory import make_model
 
@@ -165,6 +169,20 @@ class TestMakeModel:
 
         call_kwargs = mock_ollama.call_args.kwargs
         assert call_kwargs['model'] == 'mistral'
+
+    @patch('src.rag.factory.ChatOllama')
+    def test_make_model_ollama_uses_custom_base_url(self, mock_ollama, monkeypatch):
+        """Test that make_model uses custom OLLAMA_BASE_URL from environment."""
+        monkeypatch.setenv('LOCAL_MODEL', 'true')
+        monkeypatch.setenv('OLLAMA_MODEL_NAME', 'llama3.1')
+        monkeypatch.setenv('OLLAMA_BASE_URL', 'http://host.docker.internal:11434')
+
+        from src.rag.factory import make_model
+
+        make_model()
+
+        call_kwargs = mock_ollama.call_args.kwargs
+        assert call_kwargs['base_url'] == 'http://host.docker.internal:11434'
 
 
 class TestMakeAgent:
