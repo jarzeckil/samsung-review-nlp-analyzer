@@ -11,6 +11,12 @@
 [![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff)](#)
 [![Pytest](https://img.shields.io/badge/Pytest-fff?logo=pytest&logoColor=000)](#)
 
+---
+
+<img width="1000" alt="image" src="https://github.com/user-attachments/assets/934b2abb-eab8-4a01-a2bc-9603a56fee17" />
+
+---
+
 ## Summary
 
 Production-grade RAG system for semantic analysis of Samsung customer reviews scraped from TrustPilot. Implements agentic AI with tool-using LLMs to provide structured insights into review sentiment, feature requests, and customer pain points. Built for low-latency query-response cycles using vector similarity search over embedded review corpus.
