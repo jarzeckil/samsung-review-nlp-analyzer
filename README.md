@@ -139,22 +139,66 @@ EMBEDDING_MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2
 | **API** | http://localhost:8000 | FastAPI REST endpoints |
 | **API Docs** | http://localhost:8000/docs | Interactive Swagger UI |
 
+### API Reference
+
+#### POST `/ask`
+
+Query the RAG system with a natural language question.
+
+**Request**:
+```json
+{
+  "question": "What are the most common complaints about delivery?"
+}
+```
+
+**Response**:
+```json
+{
+  "response": "Based on the reviews, the most common delivery complaints include..."
+}
+```
+
+**Status Codes**:
+| Code | Description |
+|------|-------------|
+| 200 | Successful response |
+| 422 | Validation error (missing or invalid `question` field) |
+
+**Example**:
+```bash
+curl -X POST http://localhost:8000/ask \
+  -H "Content-Type: application/json" \
+  -d '{"question": "What do customers say about battery life?"}'
+```
+
 ### Using Ollama (Local LLM)
 
-Ollama enables local LLM inference without cloud API dependencies. **Note**: Ollama works only with local server setup, not with Docker deployment (due to network isolation between containers and host).
+Ollama enables local LLM inference without cloud API dependencies. Works with both Docker and local development setup.
 
 **Setup**:
 
-1. Pull your preferred model:
+1. Install Ollama from [ollama.ai](https://ollama.ai) and start the server with `ollama serve`
+2. Pull your preferred model:
    ```bash
    ollama pull llama3.1
    ```
-2. Run services locally (not via Docker):
+3. Configure `.env` for local mode:
    ```bash
+   LOCAL_MODEL=true
+   OLLAMA_MODEL_NAME=llama3.1
+   ```
+4. Run services:
+   ```bash
+   # Via Docker (recommended)
+   docker compose up -d --build
+   
+   # Or locally
    make server
    make frontend
    ```
-**Why Docker doesn't work with Ollama**: Containers run in isolated networks and cannot access the Ollama server running on the host machine without additional network configuration (host networking, custom bridge setup). For simplicity, use local development setup when working with Ollama.
+
+**Docker Integration**: The application uses `host.docker.internal` to connect from containers to the Ollama server running on the host machine. This is configured automatically in `docker-compose.yml` via `extra_hosts` and `OLLAMA_BASE_URL` environment variable.
 
 ## Data Flow & Pipeline Details
 

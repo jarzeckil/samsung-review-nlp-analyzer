@@ -6,6 +6,8 @@ services:
     container_name: samsung-review-api
     ports:
       - "8000:8000"
+    environment:
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
     env_file:
       - .env
     restart: unless-stopped
@@ -17,6 +19,8 @@ services:
       start_period: 10s
     networks:
       - samsung-review-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   frontend:
     build:
@@ -39,6 +43,7 @@ services:
       start_period: 10s
     networks:
       - samsung-review-network
+
 
 networks:
   samsung-review-network:

@@ -53,8 +53,11 @@ def make_model():
     local = os.getenv('LOCAL_MODEL')
 
     if local == 'true':
+        ollama_url = os.getenv('OLLAMA_BASE_URL', 'http://localhost:11434')
+
         model = ChatOllama(
             model=os.getenv('OLLAMA_MODEL_NAME'),
+            base_url=ollama_url,
             temperature=0.0,
         )
     else:
