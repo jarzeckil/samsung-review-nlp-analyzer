@@ -52,7 +52,7 @@ def create_agent_tools(vector_store: PineconeVectorStore) -> list:
 def make_model():
     local = os.getenv('LOCAL_MODEL')
 
-    if local:
+    if local == 'true':
         model = ChatOllama(
             model=os.getenv('OLLAMA_MODEL_NAME'),
             temperature=0.0,
