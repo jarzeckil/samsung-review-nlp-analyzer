@@ -115,7 +115,8 @@ class TestMakeModel:
     @patch('src.rag.factory.ChatGroq')
     def test_make_model_uses_env_model_name(self, mock_groq, monkeypatch):
         """Test that make_model uses model name from environment."""
-        monkeypatch.setenv('CHAT_MODEL_NAME', 'custom-model-name')
+        monkeypatch.setenv('GROQ_MODEL_NAME', 'custom-model-name')
+        monkeypatch.delenv('LOCAL_MODEL', raising=False)
 
         from src.rag.factory import make_model
 
@@ -133,6 +134,37 @@ class TestMakeModel:
 
         call_kwargs = mock_groq.call_args.kwargs
         assert call_kwargs['temperature'] == 0.0
+
+    @patch('src.rag.factory.ChatOllama')
+    def test_make_model_creates_ollama_instance_when_local(
+        self, mock_ollama, monkeypatch
+    ):
+        """Test that make_model creates ChatOllama when LOCAL_MODEL is set."""
+        monkeypatch.setenv('LOCAL_MODEL', 'true')
+        monkeypatch.setenv('OLLAMA_MODEL_NAME', 'llama3.1')
+
+        from src.rag.factory import make_model
+
+        mock_instance = Mock()
+        mock_ollama.return_value = mock_instance
+
+        result = make_model()
+
+        mock_ollama.assert_called_once_with(model='llama3.1', temperature=0.0)
+        assert result == mock_instance
+
+    @patch('src.rag.factory.ChatOllama')
+    def test_make_model_ollama_uses_env_model_name(self, mock_ollama, monkeypatch):
+        """Test that make_model uses Ollama model name from environment."""
+        monkeypatch.setenv('LOCAL_MODEL', 'true')
+        monkeypatch.setenv('OLLAMA_MODEL_NAME', 'mistral')
+
+        from src.rag.factory import make_model
+
+        make_model()
+
+        call_kwargs = mock_ollama.call_args.kwargs
+        assert call_kwargs['model'] == 'mistral'
 
 
 class TestMakeAgent:
