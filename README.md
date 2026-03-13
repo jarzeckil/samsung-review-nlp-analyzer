@@ -5,6 +5,8 @@
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![Python](https://img.shields.io/badge/Python-3.13-blue?&logo=python)](https://python.org)
 [![LangChain](https://img.shields.io/badge/LangChain-1c3c3c.svg?logo=langchain&logoColor=white)](#)
+[![Ollama](https://img.shields.io/badge/Ollama-fff?logo=ollama&logoColor=000)](#)
+[![Hugging Face](https://img.shields.io/badge/Hugging%20Face-FFD21E?logo=huggingface&logoColor=000)](#)
 [![FastAPI](https://img.shields.io/badge/FastAPI-009485.svg?logo=fastapi&logoColor=white)](#)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff)](#)
 [![Pytest](https://img.shields.io/badge/Pytest-fff?logo=pytest&logoColor=000)](#)
@@ -15,7 +17,7 @@ Production-grade RAG system for semantic analysis of Samsung customer reviews sc
 
 **Problem**: Manual analysis of unstructured customer feedback at scale is infeasible. Traditional keyword search fails to capture semantic similarity.
 
-**Solution**: Pipeline: web scraping → data cleaning → vectorization → conversational AI interface. Groq-powered LLM with ReAct-style tool use retrieves contextually relevant reviews from Pinecone vector store, enabling natural language queries over 180 cleaned reviews.
+**Solution**: Pipeline: web scraping → data cleaning → vectorization → conversational AI interface. LLM with ReAct-style tool use retrieves contextually relevant reviews from Pinecone vector store, enabling natural language queries over 180 cleaned reviews. Supports multiple LLM providers: Groq (cloud) and Ollama (local).
 
 **Business Impact**: Reduces time-to-insight from hours to seconds. Enables product teams to query review data conversationally without SQL or manual filtering.
 
@@ -47,8 +49,8 @@ graph TB
         M -->|Similarity Search| H
         H -->|Top-K Docs| M
         M -->|Context| L
-        L -->|Inference| N[ChatGroq LLM]
-        N -->|Llama 3.1 70B| L
+        L -->|Inference| N[LLM Provider]
+        N -->|Groq/Ollama| L
         L -->|Structured Response| K
         K -->|JSON| J
         J -->|Chat UI| I
@@ -66,7 +68,7 @@ graph TB
 | Component | Technology                        | Justification                                                                                                            |
 |----------|-----------------------------------|--------------------------------------------------------------------------------------------------------------------------|
 | **API** | FastAPI 0.135+ / Uvicorn          | Asynchronous ASGI server with automatic OpenAPI docs, native async/await support for non-blocking I/O during LLM inference |
-| **LLM Provider** | Groq (Llama 3.1 70B)              | Sub-second inference latency.                                                                                            |
+| **LLM Provider** | Groq (Llama 3.1 70B) / Ollama     | Groq: sub-second inference latency (cloud). Ollama: local inference for privacy/offline use (requires local server)      |
 | **RAG Framework** | LangChain 1.2+                    | Production-ready agent orchestration with tool use, standardized vector store abstractions, prompt management            |
 | **Vector Database** | Pinecone                          | Managed service with sub-50ms similarity search, metadata filtering, horizontal scalability                |
 | **Embeddings** | HuggingFace sentence-transformers | Open-source multilingual embeddings (768-dim), CPU-optimized, offline inference support                                  |
@@ -81,8 +83,9 @@ graph TB
 ### Prerequisites
 
 - Docker Engine 20.10+ and Docker Compose V2+
-- API keys: Pinecone, Groq, HuggingFace (optional)
+- API keys: Pinecone, Groq (for cloud LLM), HuggingFace (optional)
 - Minimum 4GB RAM (for embedding model + LLM context)
+- (Optional) Ollama installed locally for local LLM inference
 
 ### Setup
 
@@ -108,8 +111,16 @@ DEVICE=cpu
 PINECONE_API_KEY=sk-xxxxx
 INDEX_NAME=index-name
 CSV_NAME=reviews_cleaned.csv
+
+# LLM Provider (choose one)
+# Option 1: Groq (cloud)
 GROQ_API_KEY=gsk_xxxxx
-CHAT_MODEL_NAME=llama-3.1-70b-versatile
+GROQ_MODEL_NAME=llama-3.1-70b-versatile
+
+# Option 2: Ollama (local) - see "Using Ollama" section
+LOCAL_MODEL=true
+OLLAMA_MODEL_NAME=llama3.1
+
 HF_TOKEN=hf_xxxxx
 EMBEDDING_MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2
 ```
@@ -121,6 +132,23 @@ EMBEDDING_MODEL_NAME=sentence-transformers/all-MiniLM-L6-v2
 | **Frontend** | http://localhost:8501 | Streamlit chat interface |
 | **API** | http://localhost:8000 | FastAPI REST endpoints |
 | **API Docs** | http://localhost:8000/docs | Interactive Swagger UI |
+
+### Using Ollama (Local LLM)
+
+Ollama enables local LLM inference without cloud API dependencies. **Note**: Ollama works only with local server setup, not with Docker deployment (due to network isolation between containers and host).
+
+**Setup**:
+
+1. Pull your preferred model:
+   ```bash
+   ollama pull llama3.1
+   ```
+2. Run services locally (not via Docker):
+   ```bash
+   make server
+   make frontend
+   ```
+**Why Docker doesn't work with Ollama**: Containers run in isolated networks and cannot access the Ollama server running on the host machine without additional network configuration (host networking, custom bridge setup). For simplicity, use local development setup when working with Ollama.
 
 ## Data Flow & Pipeline Details
 
@@ -196,23 +224,23 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
 
 # Run backend
-uv run uvicorn src.serving.app:app --reload
+make api
 
 # Run frontend
-uv run streamlit run src/serving/frontend.py
+make frontend
 ```
 
 ### Code Quality
 
 ```bash
 # Lint
-uv run ruff check
+make lint
 
 # Format
-uv run ruff check --fix && uv run ruff format
+make format
 
 # Pre-commit
-pre-commit run --all-files
+uv run pre-commit
 ```
 
 ## License
