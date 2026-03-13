@@ -17,12 +17,14 @@ def mock_env_vars(monkeypatch) -> None:
         'INDEX_NAME': 'test-index',
         'CSV_NAME': 'test.csv',
         'GROQ_API_KEY': 'test-groq-key',
-        'CHAT_MODEL_NAME': 'llama-3.1-70b-versatile',
+        'GROQ_MODEL_NAME': 'llama-3.1-70b-versatile',
         'HF_TOKEN': 'test-hf-token',
         'EMBEDDING_MODEL_NAME': 'sentence-transformers/all-MiniLM-L6-v2',
     }
     for key, value in env_vars.items():
         monkeypatch.setenv(key, value)
+    # Ensure LOCAL_MODEL is not set (use Groq by default)
+    monkeypatch.delenv('LOCAL_MODEL', raising=False)
 
 
 @pytest.fixture
